@@ -14,22 +14,22 @@ R BIT P1.3
 ;*****************Main****************
 	ORG 100H
 START:
-	ACALL INLCD 	; Initialize LCD
-	MOV A,#1000B 	; Move cursor to 1st line – send high nibble
+	ACALL INLCD 		;Initialize LCD
+	MOV A,#1000B 		;Move cursor to 1st line – send high nibble
 	ACALL CMD
-	MOV A,#0000B 	;send low nibble
+	MOV A,#0000B 		;send low nibble
 	ACALL CMD
-	ACALL LDELAY 	; 4.1 msec required for this command
+	ACALL LDELAY 		;4.1 msec required for this command
 	MOV DPTR,#ModeOp
 	ACALL WSTR 		; Display String at ModeOp array
 	
-	MOV A,#1100B 	; Move cursor to 2nd line – send high nibble
+	MOV A,#1100B 		;Move cursor to 2nd line – send high nibble
 	ACALL CMD
-	MOV A,#0000B	;send low nibble
+	MOV A,#0000B		;send low nibble
 	ACALL CMD
-	ACALL LDELAY 	; 4.1 msec required for this command
+	ACALL LDELAY		;4.1 msec required for this command
 	MOV DPTR,#ModeChoice
-	ACALL WSTR 		; Display String at ModeChoice array
+	ACALL WSTR 		;Display String at ModeChoice array
 
 
 GetOperation:
@@ -76,42 +76,42 @@ STOP: SJMP $				;The stop point of the program (infinite loop).
 ;----Main Procedures----
 
 InvalidLCD:
-	MOV A,#1000B ; Move cursor to 1st line – send high nibble
+	MOV A,#1000B 		;Move cursor to 1st line – send high nibble
 	ACALL CMD
-	MOV A,#0000B ;send low nibble
+	MOV A,#0000B		;send low nibble
 	ACALL CMD
-	ACALL LDELAY ; 4.1 msec required for this command
+	ACALL LDELAY		;4.1 msec required for this command
 	MOV DPTR,#Invalid
-	ACALL WSTR ; Display String at ModeOp array	
+	ACALL WSTR		;Display String at ModeOp array	
 	AJMP STOP
 
 
 ;################Operation mode = Binary#######################
 BinaryIN:
-	ACALL ClearDisply
-	MOV A,#1000B ; Move cursor to 1st line – send high nibble
+	ACALL ClearDisply	;Remove all previous displaies
+	MOV A,#1000B 		;Move cursor to 1st line – send high nibble
 	ACALL CMD
-	MOV A,#0000B ;send low nibble
+	MOV A,#0000B		;send low nibble
 	ACALL CMD
-	ACALL LDELAY ; 4.1 msec required for this command
+	ACALL LDELAY		;4.1 msec required for this command
 	MOV DPTR,#InputB
-	ACALL WSTR ; Display String at ModeOp array
+	ACALL WSTR		;Display String at ModeOp array
 	
 	MOV R7,#9
-	MOV R6,#00
+	MOV R6,#0
 	MOV P3,#0
 
 REpeat:
 	DJNZ R7,GetInputB	;Waits for Binary input
 	MOV A,P3
 	MOV R7,#4
-	ACALL FlashG
+	ACALL FlashG		;flsh the green light for 3 (4-1) times
 	RET
 GetInputB:
 	MOV A,P3
 	RL A
 	MOV P3,A
-	ACALL KEYPAD		;get input from keypad, store it in A
+	ACALL KEYPAD			;get input from keypad, store it in A
 	MOV R1,A			;store the value of A
 	MOV C,ACC.0
 	MOV P3.0,C			;Store first bit to B.0, to check if the input is 1 or 0 (valid)
@@ -125,23 +125,23 @@ GetInputB:
 
 ;################Operation mode = Decimal#######################
 DecimalIN:
-	ACALL ClearDisply
-	MOV A,#1000B ; Move cursor to 1st line – send high nibble
+	ACALL ClearDisply	;Remove all previous displaies
+	MOV A,#1000B		;Move cursor to 1st line – send high nibble
 	ACALL CMD
-	MOV A,#0000B ;send low nibble
+	MOV A,#0000B		;send low nibble
 	ACALL CMD
-	ACALL LDELAY ; 4.1 msec required for this command
+	ACALL LDELAY		;4.1 msec required for this command
 	MOV DPTR,#InputD
-	ACALL WSTR ; Display String at ModeOp array
+	ACALL WSTR		;Display String at ModeOp array
 	
 	MOV R7,#3
 	MOV R1,#50H
 	CLR A
 REpeat2:
 	DJNZ R7,GetInputD
-	MOV A,R6
-	MOV R7,#4
-	ACALL FlashG
+	MOV A,R6		
+	MOV R7,#4		;|
+	ACALL FlashG		;flash the green light for 3 times
 	RET
 GetInputD:
 	MOV A,@R1
@@ -155,23 +155,31 @@ GetInputD:
 	CJNE A,#00H,REpeat2
 	ACALL InvalidLCD	
 
+
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;-----------------------Start of ChooseOpLCD Prosdure-----------------------
+;---------------------------------------------------------------------------
 ChooseOpLCD:
 
-	MOV A,#1000B ; Move cursor to 1st line – send high nibble
+	MOV A,#1000B		;Move cursor to 1st line – send high nibble
 	ACALL CMD
-	MOV A,#0000B ;send low nibble
+	MOV A,#0000B		;send low nibble
 	ACALL CMD
-	ACALL LDELAY ; 4.1 msec required for this command
+	ACALL LDELAY		;4.1 msec required for this command
 	MOV DPTR,#OpChoice
-	ACALL WSTR ; Display String at OpChoice array
+	ACALL WSTR		;Display String at OpChoice array
 	
-	MOV A,#1100B ; Move cursor to 2nd line – send high nibble
+	MOV A,#1100B		;Move cursor to 2nd line – send high nibble
 	ACALL CMD
-	MOV A,#0000B ;send low nibble
+	MOV A,#0000B		;send low nibble
 	ACALL CMD
-	ACALL LDELAY ; 4.1 msec required for this command
+	ACALL LDELAY		;4.1 msec required for this command
 	MOV DPTR,#OpChoice2
-	ACALL WSTR ; Display String at OpChoice2 array
+	ACALL WSTR		;Display String at OpChoice2 array
+
+
+
 
 Isit:
 	MOV P3,30H
@@ -198,30 +206,39 @@ IsitD:
 
 OPSELECTED:
 	MOV R7,#4
-	ACALL FlashG
+	ACALL FlashG		;flash the green light for 3 times
 	ACALL CALLREIN
 	RET
+
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;------------------------End of ChooseOpLCD Prosdure------------------------
+;---------------------------------------------------------------------------
+
 
 CALLREIN:
 	CJNE R5,#31H,ItisDec
 	ACALL BinaryIN
 	MOV 31H,A
 
-	MOV A,#1000B ; Move cursor to 1st line – send high nibble
+	MOV A,#1000B		;Move cursor to 1st line – send high nibble
 	ACALL CMD
-	MOV A,#0000B ;send low nibble
+	MOV A,#0000B		;send low nibble
 	ACALL CMD
-	ACALL LDELAY ; 4.1 msec required for this command
+	ACALL LDELAY		;4.1 msec required for this command
 	MOV DPTR,#Output
-	ACALL WSTR ; Display String at Output array
+	ACALL WSTR		;Display String at Output array
 	
-	MOV A,#1100B ; Move cursor to 2nd line – send high nibble
+	MOV A,#1100B		;Move cursor to 2nd line – send high nibble
 	ACALL CMD
-	MOV A,#0000B ;send low nibble
+	MOV A,#0000B		;send low nibble
 	ACALL CMD
-	ACALL LDELAY ; 4.1 msec required for this command
+	ACALL LDELAY		;4.1 msec required for this command
 	
-	ACALL Operation
+
+
+	ACALL Operation		;Perform the selected operation
+				;Call phase 1 of the project
 	MOV R7,#9
 	MOV A,32H
 	ACALL OUTPUTLCD
@@ -257,14 +274,12 @@ DISPNEXT:
 	SJMP OUTPUTLCD
 
 FlashG:
-	DJNZ R7,FlashingG
+	CLR G			;turn the green light on
+	ACALL DELAY50		;wait for a moment
+	SETB G			;turn the green light off
+	ACALL DELAY50		;wait for a moment
+	DJNZ R7,FlashG		;repet the green light flashing until the initial value of R7 becomes zero
 	RET
-FlashingG:
-	CLR G
-	ACALL DELAY50
-	SETB G
-	ACALL DELAY50
-	SJMP FlashG
 	
 DELAY50:
 	MOV R6,#20
@@ -310,33 +325,33 @@ DE2:
 
 Operation:
 	MOV R0,#30H
-	MOV A,@R0	;get the value stored in address 30H
-	MOV R2,A	;move the operand to R2
+	MOV A,@R0		;get the value stored in address 30H
+	MOV R2,A		;move the operand to R2
 
-	INC R0		;point to the second operand
-	MOV A,@R0	;get The second operand
-	;Now the operands are in A and R2
+	INC R0			;point to the second operand
+	MOV A,@R0		;get The second operand
+				;Now the operands are in A and R2
 
 
 
-	JB P0.0,aP00is1	;continue if P0.0=0
-	JB P0.1,aP01is1	;continue if P0.0=0 and P0.1=0
+	JB P0.0,aP00is1		;continue if P0.0=0
+	JB P0.1,aP01is1		;continue if P0.0=0 and P0.1=0
 ;#############
 ;P0.0=0, P0.1=0
 ;NAND
-	ANL A,R2	;A has A(and)R2
-	CPL A		;A has A(nand)R2
+	ANL A,R2		;A has A(and)R2
+	CPL A			;A has A(nand)R2
 	SJMP EndOfOperation
 
 ;End of NAND
 ;#############
 aP00is1:
-	JB P0.1,bP01is1	;continue if P0.0=1 and P0.1=0
+	JB P0.1,bP01is1		;continue if P0.0=1 and P0.1=0
 ;#############
 ;P0.0=1, P0.1=0
 ;NOR
-	ORL A,R2	;A has A(or)R2
-	CPL A		;A has A(nor)R2
+	ORL A,R2		;A has A(or)R2
+	CPL A			;A has A(nor)R2
 	SJMP EndOfOperation
 
 ;end of NOR
@@ -345,7 +360,7 @@ aP01is1:
 ;#############
 ;P0.0=0, P0.1=1
 ;XOR
-	XRL A,R2	;A has A(XOR)R2
+	XRL A,R2		;A has A(XOR)R2
 	SJMP EndOfOperation
 
 ;end of XOR
@@ -354,15 +369,15 @@ bP01is1:
 ;#############
 ;P0.0=1, P0.1=1
 ;XNOR
-	XRL A,R2	;A has A(XOR)R2
-	CPL A		;A has A(XNOR)R2
+	XRL A,R2		;A has A(XOR)R2
+	CPL A			;A has A(XNOR)R2
 	SJMP EndOfOperation
 
 ;end of XNOR
 ;#############
 
 EndOfOperation:
-	MOV 32H,A	;store A in 32H(the resualt)	
+	MOV 32H,A		;store A in 32H(the resualt)	
 
 	RET			;assuming this phase is a sub-routine
 ;----end of Phase 1----
