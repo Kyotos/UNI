@@ -31,23 +31,43 @@ START:
 	MOV DPTR,#ModeChoice
 	ACALL WSTR 		; Display String at ModeChoice array
 
-GetOperation:
-	ACALL KEYPAD
-	CJNE A,#31H,MODEDEC
-	MOV R5,A
-	ACALL BinaryIN
-	MOV 30H,A
-	ACALL ChooseOpLCD
-	SJMP STOP
-MODEDEC:
-	CJNE A,#32H,GetOperation
-	MOV R5,A
-	ACALL DecimalIN
-	MOV 30H,A
-	ACALL ChooseOpLCD
-	SJMP STOP
 
-STOP: SJMP $
+GetOperation:
+	ACALL KEYPAD		;get the press key, store it in A
+	CJNE A,#31H,MODEDEC	;Check if the key pressed is not '1' (it is not binary mode), Jump to the Decimal Mode and check if it is '2'
+	MOV R5,A		;else
+				;store the key pressed in R5 (to keep track of the Mode)
+	ACALL BinaryIN		;And call Binary Mode, and get the first operand
+	MOV 30H,A		;Store the first operand in 30H
+	ACALL ChooseOpLCD	;chose the opration (NAND,NOR,XOR,XNOR)
+				;and enter the second operan in location 31H
+				;after all perform the operation, and display the result
+
+	SJMP STOP		;Stop the program
+
+MODEDEC:
+	CJNE A,#32H,GetOperation	;if the key press to select the Mode is neither '2', back again and get a new key
+	MOV R5,A			;store the Mode
+	ACALL DecimalIN			;get the first operand (in decimal).
+	MOV 30H,A			;store first operand in 30H
+	ACALL ChooseOpLCD		;select operation + get second operand + perform operation + display result
+
+	SJMP STOP			;Stop the program
+
+
+STOP: SJMP $				;The stop point of the program (infinite loop).
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	ORG 300H
